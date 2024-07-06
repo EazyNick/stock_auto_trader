@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../home/home_screen.dart';  // 상대 경로로 정확하게 import
+import 'button/login_button.dart';
+import 'button/signup_button.dart';
 
 //StatefulWidget은 상태를 가지는 위젯을 정의할 때 사용됩니다.
 class LoginScreen extends StatefulWidget {
@@ -31,54 +32,88 @@ class _LoginScreenState extends State<LoginScreen> {
   void _submit() {
     // 폼이 유효한지 검사합니다. '!'는 null이 아님을 보장
     if (_formKey.currentState!.validate()) {
-      // 폼의 상태를 저장합니다.
+      // 폼의 상태를 저장
       _formKey.currentState!.save();
-      // 로그인 로직이나 상태 관리를 처리할 부분
-      // 로그인 성공 시 홈 화면으로 이동합니다.
-      // pushReplacement 메서드는 현재 화면을 새로운 화면으로 대체합니다. 즉, 새로운 화면으로 전환하고 이전 화면을 제거
-      Navigator.pushReplacement(
-        context, // context는 현재 위젯 트리에서 이 위젯의 위치를 나타내는 BuildContext입니다. 화면 전환 시 필요한 정보임
-        MaterialPageRoute(builder: (context) => HomeScreen()), // MaterialPageRoute는 화면 전환 애니메이션과 함께 새로운 페이지를 생성
-      );
+      // main.dart에서 Route로 맵핑 필요
+      Navigator.pushReplacementNamed(context, '/home');
     }
   }
 
   @override
+  // 부모 클래스의 build 메서드를 재정의
   Widget build(BuildContext context) {
+    // Scaffold 위젯은 기본적인 화면 레이아웃 구조를 제공
     return Scaffold(
+      // 상단 앱 바를 정의
       appBar: AppBar(
+        // 앱 바의 제목을 '로그인'으로 설정합니다.
         title: Text('로그인'),
       ),
-      body: Form(
-        key: _formKey,
-        child: Column(
-          children: <Widget>[
-            TextFormField(
-              decoration: InputDecoration(labelText: '이메일'),
-              validator: (value) {
-                if (value == null || value.isEmpty || !value.contains('@')) {
-                  return '유효한 이메일 주소를 입력하세요';
-                }
-                return null;
-              },
-              onSaved: (value) => _email = value ?? '',
-            ),
-            TextFormField(
-              decoration: InputDecoration(labelText: '비밀번호'),
-              obscureText: true,
-              validator: (value) {
-                if (value == null || value.isEmpty || value.length < 6) {
-                  return '비밀번호는 최소 6자 이상이어야 합니다';
-                }
-                return null;
-              },
-              onSaved: (value) => _password = value ?? '',
-            ),
-            ElevatedButton(
-              onPressed: _submit,
-              child: Text('로그인'),
-            ),
-          ],
+      // // Padding 위젯은 주어진 padding 값만큼 자식 위젯 주위에 여백을 추가
+      // Padding: 위젯 주위에 여백을 추가하는 데 사용
+      body: Padding(
+        // 모든 방향에서 16.0의 여백을 추가
+        padding: const EdgeInsets.all(16.0),
+        // Form 위젯은 폼 필드를 포함하는 컨테이너 역할을 합니다.
+        // Form 위젯은 여러 입력 필드를 포함하는 위젯으로, 폼의 상태를 관리
+        child: Form(
+          // Form의 상태를 관리하기 위한 키를 설정
+          // 폼의 유효성 검사와 저장 상태를 관리하는 데 사용
+          key: _formKey,
+          // 세로로 위젯들을 배치하는 Column 위젯
+          child: Column(
+            // 자식 위젯들을 리스트 형태로 정의
+            children: <Widget>[
+              // 텍스트 입력 필드를 정의
+              TextFormField(
+                // 입력 필드의 레이블을 '이메일'로 설정
+                decoration: InputDecoration(labelText: '이메일'),
+                // 입력값을 검증하는 함수
+                validator: (value) {
+                  // 입력값이 null, 비어있거나 '@' 문자가 포함되지 않은 경우 메시지를 반환합니다.
+                  if (value == null || value.isEmpty || !value.contains('@')) {
+                    return '유효한 이메일 주소를 입력하세요';
+                  }
+                  // 입력값이 유효한 경우 null을 반환
+                  return null;
+                },
+                // 폼이 저장될 때 호출되며, 입력값을 _email 변수에 저장합니다.
+                onSaved: (value) => _email = value ?? '',
+              ),
+              // 비밀번호 입력 필드를 정의합니다.
+              TextFormField(
+                // 입력 필드의 레이블을 '비밀번호'로 설정합니다.
+                decoration: InputDecoration(labelText: '비밀번호'),
+                // 입력값을 가려서 표시합니다.
+                obscureText: true,
+                // 입력값을 검증하는 함수입니다.
+                validator: (value) {
+                  // 입력값이 null, 비어있거나 6자 미만인 경우 에러 메시지를 반환합니다.
+                  if (value == null || value.isEmpty || value.length < 6) {
+                    return '비밀번호는 최소 6자 이상이어야 합니다';
+                  }
+                  // 입력값이 유효한 경우 null을 반환합니다.
+                  return null;
+                },
+                // 폼이 저장될 때 호출되며, 입력값을 _password 변수에 저장합니다.
+                // onSaved 가 호출될 때, (value) 함수를 호출하는 것임.
+                // (value) => 는 v0alue를 매개변수로 받는 함수이다. 함수 내용은 value를 _password에 넣는다.
+                // ?? (널 병합 연산자), value가 null일 경우 ''을 반환
+                onSaved: (value) => _password = value ?? '',
+              ),
+              // 버튼 위젯을 정의합니다.
+              // ElevatedButton(입체적), TextButton(평평) 차이는 모양이 다름
+              LoginButton(
+                // 버튼이 눌렸을 때 _submit 메서드를 호출합니다.
+                // _submit 메서드에서 validate() 메서드를 호출하여 폼의 모든 필드를 검증
+                // validate()가 true를 반환하면 save() 메서드를 호출
+                // save() 메서드는 Form의 각 TextFormField 위젯에 정의된 onSaved 콜백을 실행하여 입력된 값을 저장
+                onPressed: _submit,
+                // 버튼의 텍스트를 '로그인'으로 설정합니다.
+              ),
+              SignupButton(),  // SignupButton 위젯을 사용합니다.
+            ],
+          ),
         ),
       ),
     );

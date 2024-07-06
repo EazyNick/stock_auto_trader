@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'Home/home_screen.dart';
 import 'Login/login_screen.dart';
+import 'signup/signup_screen.dart';
 
 void main() {
   // runApp 함수는 주어진 위젯을 화면에 그립니다. 여기서는 MyApp 위젯을 그립니다.
@@ -25,6 +27,15 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue, // 테마 설정, primarySwatch는 주 색상
       ),
       home: LoginScreen(), // home 속성은 애플리케이션이 시작될 때 처음으로 보여줄 화면을 설정
+      // routes 속성은 문자열 경로와 해당 경로에 매핑되는 위젯을 정의하는 맵(Map)입니다.
+      // 이 맵은 경로 이름을 키(key)로, 해당 경로로 이동할 때 생성되는 위젯을 반환하는 함수로 구성
+      // 경로이름 : (context) => 반환 위젯
+      // Navigator.pushReplacementNamed(context, '/login'); 형식으로 화면 전환이 가능하게 해줌
+      routes: {
+        '/login': (context) => LoginScreen(),
+        '/signup': (context) => SignupScreen(),
+        '/home': (context) => HomeScreen(),
+      },
     );
   }
 }
