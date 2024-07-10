@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Login/login_screen.dart';
+import 'package:dio/dio.dart';
 
 class SignupScreen extends StatefulWidget {
   @override
@@ -10,6 +10,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  String _username = '';
   String _email = '';
   String _password = '';
 
@@ -20,13 +21,43 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
-      // 폼의 상태를 저장
       _formKey.currentState!.save();
-      // 회원가입 로직이나 상태 관리를 처리할 부분
-      // 회원가입 성공 시 로그인 페이지로 이동합니다.
-      Navigator.pushReplacementNamed(context, '/login');
+
+      Dio dio = Dio(
+        BaseOptions(
+          baseUrl: 'https://fintech19190301.kro.kr/',
+          connectTimeout: Duration(seconds: 5), // Duration 타입으로 변경
+          receiveTimeout: Duration(seconds: 3), // Duration 타입으로 변경
+        ),
+      )..interceptors.add(LogInterceptor(responseBody: true)); // 로그 인터셉터 추가
+
+      try {
+        final response = await dio.post(
+          'api/items/',
+          data: {
+            'username': _username,
+            'email': _email,
+            'password': _password,
+          },
+        );
+
+        if (response.statusCode == 201) {
+          // 회원가입 성공 시 로그인 페이지로 이동
+          Navigator.pushReplacementNamed(context, '/login');
+        } else {
+          // 서버로부터 에러 응답을 받은 경우 처리
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('회원가입 실패: ${response.statusMessage}')),
+          );
+        }
+      } catch (e) {
+        // 네트워크 오류 또는 다른 오류 처리
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('회원가입 실패: $e')),
+        );
+      }
     }
   }
 
@@ -42,6 +73,16 @@ class _SignupScreenState extends State<SignupScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: <Widget>[
+              TextFormField(
+                decoration: InputDecoration(labelText: '사용자 이름'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '유효한 사용자 이름을 입력하세요';
+                  }
+                  return null;
+                },
+                onSaved: (value) => _username = value ?? '',
+              ),
               TextFormField(
                 decoration: InputDecoration(labelText: '이메일'),
                 validator: (value) {
