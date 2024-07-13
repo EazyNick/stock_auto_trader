@@ -1,17 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 
 class LoginButton extends StatelessWidget {
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
   final VoidCallback onPressed;
 
-  // onPressed라는 하나의 매개변수를 필요로 하며, 이 매개변수는 required 키워드를 사용하여 필수로 지정
-  const LoginButton({required this.onPressed});
+  const LoginButton({
+    Key? key,
+    required this.emailController,
+    required this.passwordController,
+    required this.onPressed,
+  }) : super(key: key);
+
+  Future<void> login(BuildContext context) async {
+    Dio dio = Dio(
+      BaseOptions(
+        baseUrl: 'https://fintech19190301.kro.kr/',
+        connectTimeout: Duration(seconds: 5),
+        receiveTimeout: Duration(seconds: 3),
+      ),
+    )..interceptors.add(LogInterceptor(responseBody: true)); // 로그 인터셉터 추가
+
+    try {
+      final response = await dio.post(
+        'api/accounts/login/',
+        data: {
+          'Email': emailController.text,
+          'Password': passwordController.text,
+        },
+      );
+      // 로그인 성공 시 처리
+      print(response.data);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login successful')));
+      Navigator.pushReplacementNamed(context, '/home');
+    } on DioError catch (e) {
+      // 로그인 실패 시 처리
+      if (e.response != null) {
+        print(e.response?.data);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${e.response?.data}')));
+      } else {
+        print(e.message);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${e.message}')));
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      // 버튼이 눌렸을 때 호출될 콜백 함수를 설정합니다.
       onPressed: onPressed,
-      // 버튼의 텍스트를 '로그인'으로 설정합니다.
       child: Text('로그인'),
     );
   }

@@ -35,11 +35,11 @@ class _SignupScreenState extends State<SignupScreen> {
 
       try {
         final response = await dio.post(
-          'api/items/',
+          'api/accounts/',
           data: {
+            'Email': _email,
+            'Password': _password,
             'username': _username,
-            'email': _email,
-            'password': _password,
           },
         );
 
