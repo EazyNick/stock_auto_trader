@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-import 'button/login_button.dart';
-import 'button/signup_button.dart';
+import 'Button/login_button.dart';
+import 'Button/signup_button.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
