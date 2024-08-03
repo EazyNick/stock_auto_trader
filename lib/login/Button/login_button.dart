@@ -26,7 +26,7 @@ class LoginButton extends StatelessWidget {
       BaseOptions(
         baseUrl: 'https://fintech19190301.kro.kr/',
         connectTimeout: Duration(seconds: 5),
-        receiveTimeout: Duration(seconds: 3),
+        receiveTimeout: Duration(seconds: 10),
       ),
     )..interceptors.add(LogInterceptor(responseBody: true)); // 로그 인터셉터 추가
 
