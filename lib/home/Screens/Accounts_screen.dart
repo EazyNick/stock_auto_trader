@@ -10,6 +10,7 @@ class AccountsCheckScreen extends StatefulWidget {
 
 class _AccountsCheckScreenState extends State<AccountsCheckScreen> {
   AccountInfo? _accountInfo;
+  List<StockInfo>? _stockInfoList;
   bool _isLoading = false;
   final logger = Logger();
 
@@ -33,9 +34,14 @@ class _AccountsCheckScreenState extends State<AccountsCheckScreen> {
       // 서버 응답 데이터 로그 출력
       logger.i('Server response: ${response.data}');
 
-      // 요청 성공 시 응답 데이터를 AccountInfo 객체로 변환하고 상태 변수에 저장
+      // 요청 성공 시 응답 데이터를 AccountInfo 및 StockInfo 객체로 변환하고 상태 변수에 저장
       setState(() {
         _accountInfo = AccountInfo.fromJson(response.data['account_info']);
+        if (response.data['stock_info_list'] != null) {
+          _stockInfoList = (response.data['stock_info_list'] as List)
+              .map((i) => StockInfo.fromJson(i))
+              .toList();
+        }
         _isLoading = false;
       });
     } catch (e) {
@@ -86,12 +92,12 @@ class _AccountsCheckScreenState extends State<AccountsCheckScreen> {
     logger.i('Building AccountsCheckScreen UI');
     return Scaffold(
       appBar: AppBar(
-        title: Text('Accounts States'), // 앱 바의 제목 설정
+        title: Text('계좌 상태'), // 앱 바의 제목 설정
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _accountInfo == null
-          ? Center(child: Text('정보가 없는데?'))
+          ? Center(child: Text('정보가 없습니다'))
           : Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
@@ -108,11 +114,18 @@ class _AccountsCheckScreenState extends State<AccountsCheckScreen> {
             _buildAccountInfoCard('주식 평가금액', _accountInfo!.sctsEvluAmt),
             _buildAccountInfoCard('총 평가금액', _accountInfo!.totEvluAmt),
             _buildAccountInfoCard('구매 금액', _accountInfo!.pchsAmtSmtlAmt),
-            _buildAccountInfoCard('평가 금액', _accountInfo!.evluAmtSmtlAmt),
+            _buildAccountInfoCard('평가 금액(주식+현금)', _accountInfo!.evluAmtSmtlAmt),
             _buildAccountInfoCard('평가 손익', _accountInfo!.evluPflsSmtlAmt),
             _buildAccountInfoCard('전날 총 자산 평가금액', _accountInfo!.bfdyTotAsstEvluAmt),
             _buildAccountInfoCard('자산 증감 금액', _accountInfo!.asstIcdcAmt),
             _buildAccountInfoCard('자산 증감 수익률', _accountInfo!.asstIcdcErngRt),
+
+            if (_stockInfoList != null) ...[
+              SizedBox(height: 20),
+              Text('보유 주식', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              for (var stock in _stockInfoList!)
+                _buildStockInfoCard(stock),
+            ],
           ],
         ),
       ),
@@ -131,6 +144,29 @@ class _AccountsCheckScreenState extends State<AccountsCheckScreen> {
         trailing: Text(
           value.toString(),
           style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStockInfoCard(StockInfo stock) {
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 8.0),
+      child: ListTile(
+        title: Text(stock.prdtName),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('보유 수량: ${stock.hldgQty}'),
+            Text('주문 가능 수량: ${stock.ordPsblQty}'),
+            Text('매입 평균가: ${stock.pchsAvgPric}'),
+            Text('매입 금액: ${stock.pchsAmt}'),
+            Text('현재가: ${stock.prpr}'),
+            Text('평가 금액: ${stock.evluAmt}'),
+            Text('평가 손익 금액: ${stock.evluPflsAmt}'),
+            Text('평가 손익률: ${stock.evluPflsRt}'),
+            Text('등락률: ${stock.flttRt}'),
+          ],
         ),
       ),
     );
