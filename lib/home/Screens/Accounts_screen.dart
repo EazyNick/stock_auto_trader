@@ -22,7 +22,7 @@ class _AccountsCheckScreenState extends State<AccountsCheckScreen> {
     Dio dio = Dio(); // Dio 인스턴스 생성
     try {
       logger.i('Sending request to server...');
-      // 서버에 POST 요청 보내기
+      // 서버에 GET 요청 보내기
       final response = await dio.get(
         'https://fintech19190301.kro.kr/api/account/status/',
         queryParameters: {
@@ -47,6 +47,11 @@ class _AccountsCheckScreenState extends State<AccountsCheckScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to load account status: $e')),
       );
+    } finally {
+      // 팝업 닫기
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
     }
   }
 
@@ -91,12 +96,17 @@ class _AccountsCheckScreenState extends State<AccountsCheckScreen> {
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
+            Text('현금', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             _buildAccountInfoCard('총 예수금', _accountInfo!.dncaTotAmt),
             _buildAccountInfoCard('다음날 예수금', _accountInfo!.nxdyExccAmt),
             _buildAccountInfoCard('이전 예수금', _accountInfo!.prvsRcdlExccAmt),
-            _buildAccountInfoCard('평가금액', _accountInfo!.sctsEvluAmt),
-            _buildAccountInfoCard('총 평가금액', _accountInfo!.totEvluAmt),
             _buildAccountInfoCard('현금', _accountInfo!.nassAmt),
+
+            SizedBox(height: 20),
+
+            Text('주식', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            _buildAccountInfoCard('주식 평가금액', _accountInfo!.sctsEvluAmt),
+            _buildAccountInfoCard('총 평가금액', _accountInfo!.totEvluAmt),
             _buildAccountInfoCard('구매 금액', _accountInfo!.pchsAmtSmtlAmt),
             _buildAccountInfoCard('평가 금액', _accountInfo!.evluAmtSmtlAmt),
             _buildAccountInfoCard('평가 손익', _accountInfo!.evluPflsSmtlAmt),
