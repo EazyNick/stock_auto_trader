@@ -2,25 +2,38 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'Button/login_button.dart';
 import 'Button/signup_button.dart';
+import '../utils/logger.dart' as utils_logger;
 
+/// 로그인 화면을 나타내는 StatefulWidget
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
 
+/// 로그인 화면의 상태를 관리하는 State 클래스
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final logger = utils_logger.getLogger(); // 로거 인스턴스 가져오기
 
+  /// 폼이 유효한지 검증하고 홈 화면으로 이동하는 메서드
   void _submit() {
+    // 폼 검증
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+      logger.i('Form is valid, navigating to home screen.');
       Navigator.pushReplacementNamed(context, '/home');
+    } else {
+      logger.w('Form validation failed.');
     }
   }
 
+  /// 서버에 로그인 요청을 보내는 메서드
+  ///
+  /// [context]는 현재 빌드 컨텍스트입니다.
   Future<void> _login(BuildContext context) async {
+    logger.i('Attempting to log in with email: ${_emailController.text}');
     Dio dio = Dio(
       BaseOptions(
         baseUrl: 'https://fintech19190301.kro.kr/',
@@ -37,20 +50,23 @@ class _LoginScreenState extends State<LoginScreen> {
           'Password': _passwordController.text,
         },
       );
-      print(response.data);
+      // 로그인 성공 시 처리
+      logger.i('Login successful: ${response.data}');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login successful')));
       Navigator.pushReplacementNamed(context, '/home');
     } on DioError catch (e) {
+      // 로그인 실패 시 처리
       if (e.response != null) {
-        print(e.response?.data);
+        logger.e('Login failed: ${e.response?.data}');
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${e.response?.data}')));
       } else {
-        print(e.message);
+        logger.e('Login failed: ${e.message}');
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${e.message}')));
       }
     }
   }
 
+  /// 위젯 트리를 빌드하여 UI를 구성하는 메서드
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,6 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
           key: _formKey,
           child: Column(
             children: <Widget>[
+              /// 이메일 입력 필드
               TextFormField(
                 decoration: InputDecoration(labelText: '이메일'),
                 validator: (value) {
@@ -73,6 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 },
                 controller: _emailController,
               ),
+              /// 비밀번호 입력 필드
               TextFormField(
                 decoration: InputDecoration(labelText: '비밀번호'),
                 obscureText: true,
@@ -84,11 +102,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 },
                 controller: _passwordController,
               ),
+              /// 로그인 버튼
               LoginButton(
                 emailController: _emailController,
                 passwordController: _passwordController,
-                onPressed: () => _login(context),
+                onPressed: () {
+                  logger.i('Login button pressed.');
+                  _login(context);
+                },
               ),
+              /// 회원가입 버튼
               SignupButton(),
             ],
           ),

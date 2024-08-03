@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'asset_check_screen.dart';
+import 'Accounts_screen.dart';
 import 'investment_info_screen.dart';
 import 'stock_ranking_screen.dart';
 import 'major_indices_screen.dart';
@@ -22,7 +22,7 @@ class HomeScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AssetCheckScreen()),
+                  MaterialPageRoute(builder: (context) => AccountsCheckScreen()),
                 );
               },
               child: Text('자산 확인 - 총 자산 간편 확인'),
