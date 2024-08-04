@@ -32,25 +32,56 @@ class LoginButton extends StatelessWidget {
       );
       // 로그인 성공 시 처리
       print(response.data);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login successful')));
-      Navigator.pushReplacementNamed(context, '/home');
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Login successful'),
+            content: Text('You have successfully logged in.'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop(); // 팝업 닫기
+                  Navigator.pushReplacementNamed(context, '/home'); // 홈 화면으로 이동
+                },
+              ),
+            ],
+          );
+        },
+      );
     } on DioError catch (e) {
       // 로그인 실패 시 처리
-      if (e.response != null) {
-        print(e.response?.data);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${e.response?.data}')));
-      } else {
-        print(e.message);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${e.message}')));
-      }
+      String errorMessage = e.response != null ? e.response?.data : e.message;
+      print(errorMessage);
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Login failed'),
+            content: Text('Login failed: $errorMessage'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop(); // 팝업 닫기
+                },
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: onPressed,
+      onPressed: () {
+        login(context);
+      },
       child: Text('로그인'),
     );
   }
 }
+
