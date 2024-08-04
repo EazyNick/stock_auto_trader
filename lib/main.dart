@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'home/Screens/home_screen.dart';
+import 'home/home_screen.dart';
 import 'login/login_screen.dart';
 import 'signup/signup_screen.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+Future<void> main() async {
+  await dotenv.load(fileName: "assets/.env");
   // runApp 함수는 주어진 위젯을 화면에 그립니다. 여기서는 MyApp 위젯을 그립니다.
   runApp(MyApp());
 }
@@ -22,6 +24,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // MaterialApp은 Flutter 애플리케이션의 기본적인 설정을 제공
     return MaterialApp(
+      debugShowCheckedModeBanner: false, // "debug" 배너를 숨깁니다.
       title: 'Flutter Demo', // 제목
       theme: ThemeData(
         primarySwatch: Colors.blue, // 테마 설정, primarySwatch는 주 색상

@@ -3,6 +3,8 @@ import 'package:dio/dio.dart';
 import 'account_info.dart';
 import 'package:logger/logger.dart';
 
+// CSRF 안받는중
+
 class AccountsCheckScreen extends StatefulWidget {
   @override
   _AccountsCheckScreenState createState() => _AccountsCheckScreenState();
@@ -120,11 +122,13 @@ class _AccountsCheckScreenState extends State<AccountsCheckScreen> {
             _buildAccountInfoCard('자산 증감 금액', _accountInfo!.asstIcdcAmt),
             _buildAccountInfoCard('자산 증감 수익률', _accountInfo!.asstIcdcErngRt),
 
-            if (_stockInfoList != null) ...[
-              SizedBox(height: 20),
-              Text('보유 주식', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            SizedBox(height: 20),
+            Text('보유 주식', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            if (_stockInfoList != null && _stockInfoList!.isNotEmpty) ...[
               for (var stock in _stockInfoList!)
                 _buildStockInfoCard(stock),
+            ] else ...[
+              Center(child: Text('보유 주식이 없습니다')),
             ],
           ],
         ),
@@ -136,6 +140,7 @@ class _AccountsCheckScreenState extends State<AccountsCheckScreen> {
     );
   }
 
+  /// 계좌 정보를 표시하는 카드 위젯 생성
   Widget _buildAccountInfoCard(String title, dynamic value) {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8.0),
@@ -149,6 +154,7 @@ class _AccountsCheckScreenState extends State<AccountsCheckScreen> {
     );
   }
 
+  /// 주식 정보를 표시하는 카드 위젯 생성
   Widget _buildStockInfoCard(StockInfo stock) {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8.0),
