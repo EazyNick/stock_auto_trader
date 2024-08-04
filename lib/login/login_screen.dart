@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'Button/login_button.dart';
 import 'Button/signup_button.dart';
-import 'social_sign_in/google_sign_in_button.dart';
-import 'social_sign_in/naver_sign_in_button.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -91,10 +89,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 passwordController: _passwordController,
                 onPressed: () => _login(context),
               ),
-              SizedBox(height: 16.0),
-              GoogleSignInButton(), // 구글 로그인 버튼
-              SizedBox(height: 16.0), // 간격 추가
-              NaverSignInButton(), // 네이버 로그인 버튼 추가
               SignupButton(),
             ],
           ),
@@ -103,6 +97,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-
-
-
