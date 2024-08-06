@@ -14,7 +14,7 @@ class AccountInfo {
   final int evluPflsSmtlAmt;
   final int bfdyTotAsstEvluAmt;
   final int asstIcdcAmt;
-  final int asstIcdcErngRt;
+  final double asstIcdcErngRt; // double 타입으로 수정
 
   AccountInfo({
     required this.dncaTotAmt,
