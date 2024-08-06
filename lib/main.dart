@@ -4,8 +4,8 @@ import 'login/login_screen.dart';
 import 'signup/signup_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:cookie_jar/cookie_jar.dart';
-import 'social_sign_in/google_sign_in_button.dart'; // 구글 로그인 버튼 경로 추가
-import 'social_sign_in/naver_sign_in_button.dart'; // 네이버 로그인 버튼 경로 추가
+// import 'social_sign_in/google_sign_in_button.dart'; // 구글 로그인 버튼 경로 추가
+// import 'social_sign_in/naver_sign_in_button.dart'; // 네이버 로그인 버튼 경로 추가
 
 Future<void> main() async {
   await dotenv.load(fileName: "assets/.env");
