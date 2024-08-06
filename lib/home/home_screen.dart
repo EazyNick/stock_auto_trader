@@ -6,8 +6,14 @@ import 'Screens/major_indices_screen.dart';
 import 'Screens/favorites_screen.dart';
 import 'Screens/top_performing_stocks_screen.dart';
 import 'Screens/chatbot_screen.dart';
+import 'package:cookie_jar/cookie_jar.dart';
 
 class HomeScreen extends StatelessWidget {
+  final String csrfToken; // CSRF 토큰을 받기 위해 추가
+  final CookieJar cookieJar; // 쿠키 매니저를 받기 위해 추가
+
+  HomeScreen({required this.csrfToken, required this.cookieJar}); // CSRF 토큰과 쿠키 매니저를 받는 생성자
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,7 +91,9 @@ class HomeScreen extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ChatBotScreen()), // 챗봇 화면으로 이동
+            MaterialPageRoute(
+              builder: (context) => ChatBotScreen(csrfToken: csrfToken, cookieJar: cookieJar), // 챗봇 화면으로 CSRF 토큰과 쿠키 매니저 전달
+            ),
           );
         },
         child: SizedBox(
@@ -93,7 +101,7 @@ class HomeScreen extends StatelessWidget {
           height: 40,
           child: Image.asset(
             'assets/images/chatbot_icon.png',
-            fit: BoxFit.contain, // 이미지가 왜곡되지 않도록 조절
+            fit: BoxFit.contain,
           ),
         ),
         backgroundColor: Colors.blue,
