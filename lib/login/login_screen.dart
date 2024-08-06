@@ -2,26 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'Button/login_button.dart';
 import 'Button/signup_button.dart';
-<<<<<<< Updated upstream
-=======
 import '../utils/logger.dart' as utils_logger;
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import '../home/home_screen.dart';
->>>>>>> Stashed changes
 
+/// 로그인 화면을 나타내는 StatefulWidget
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
 
+/// 로그인 화면의 상태를 관리하는 State 클래스
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final logger = utils_logger.getLogger(); // 로거 인스턴스 가져오기
 
-<<<<<<< Updated upstream
-=======
   late Dio _dio; // late 키워드를 사용하여 나중에 초기화
   String? csrfToken; // CSRF 토큰 저장
   late CookieJar cookieJar;
@@ -40,25 +38,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   /// 폼이 유효한지 검증하고 홈 화면으로 이동하는 메서드
->>>>>>> Stashed changes
   void _submit() {
+    // 폼 검증
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-<<<<<<< Updated upstream
-      Navigator.pushReplacementNamed(context, '/home');
-    }
-  }
-
-  Future<void> _login(BuildContext context) async {
-    Dio dio = Dio(
-      BaseOptions(
-        baseUrl: 'https://fintech19190301.kro.kr/',
-        connectTimeout: Duration(seconds: 5),
-        receiveTimeout: Duration(seconds: 3),
-      ),
-    )..interceptors.add(LogInterceptor(responseBody: true)); // 로그 인터셉터 추가
-
-=======
       logger.i('Form is valid, navigating to home screen.');
       Navigator.pushReplacementNamed(context, '/home', arguments: {'csrfToken': csrfToken, 'cookieJar': cookieJar});
     } else {
@@ -69,7 +52,6 @@ class _LoginScreenState extends State<LoginScreen> {
   /// 서버에 로그인 요청을 보내는 메서드
   Future<void> _login(BuildContext context) async {
     logger.i('Attempting to log in with email: ${_emailController.text}');
->>>>>>> Stashed changes
     try {
       final response = await _dio.post(
         'api/accounts/login/',
@@ -78,11 +60,6 @@ class _LoginScreenState extends State<LoginScreen> {
           'Password': _passwordController.text,
         },
       );
-<<<<<<< Updated upstream
-      print(response.data);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login successful')));
-      Navigator.pushReplacementNamed(context, '/home');
-=======
       // 로그인 성공 시 처리
       if (response.statusCode == 200) {
         logger.i('Login successful: ${response.data}');
@@ -107,13 +84,13 @@ class _LoginScreenState extends State<LoginScreen> {
         logger.e('Login failed: ${response.data}');
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${response.data}')));
       }
->>>>>>> Stashed changes
     } on DioError catch (e) {
+      // 로그인 실패 시 처리
       if (e.response != null) {
-        print(e.response?.data);
+        logger.e('Login failed: ${e.response?.data}');
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${e.response?.data}')));
       } else {
-        print(e.message);
+        logger.e('Login failed: ${e.message}');
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${e.message}')));
       }
     }
@@ -155,8 +132,12 @@ class _LoginScreenState extends State<LoginScreen> {
               LoginButton(
                 emailController: _emailController,
                 passwordController: _passwordController,
-                onPressed: () => _login(context),
+                onPressed: () {
+                  logger.i('Login button pressed.');
+                  _login(context);
+                },
               ),
+              SizedBox(height: 16.0),
               SignupButton(),
             ],
           ),

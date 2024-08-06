@@ -31,13 +31,12 @@ dependencies:
   flutter:
     sdk: flutter
   dio: ^5.0.0
-<<<<<<< Updated upstream
-=======
   logger: ^1.0.0
   flutter_dotenv: ^5.0.2
   dio_cookie_manager: ^2.0.0
   cookie_jar: ^3.0.1
->>>>>>> Stashed changes
+  google_sign_in: ^5.0.7
+  flutter_naver_login: ^1.8.0 # 패키지 버전 업그레이드
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -59,7 +58,9 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
+  assets:
+    - assets/images/chatbot_icon.png
+    - assets/.env
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

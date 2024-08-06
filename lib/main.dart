@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
-import 'Home/Screens/home_screen.dart';
-import 'Login/login_screen.dart';
+import 'home/home_screen.dart';
+import 'login/login_screen.dart';
 import 'signup/signup_screen.dart';
-<<<<<<< Updated upstream
-
-void main() {
-  // runApp 함수는 주어진 위젯을 화면에 그립니다. 여기서는 MyApp 위젯을 그립니다.
-=======
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'social_sign_in/google_sign_in_button.dart'; // 구글 로그인 버튼 경로 추가
+import 'social_sign_in/naver_sign_in_button.dart'; // 네이버 로그인 버튼 경로 추가
 
 Future<void> main() async {
   await dotenv.load(fileName: "assets/.env");
->>>>>>> Stashed changes
   runApp(MyApp());
 }
 
@@ -22,12 +18,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-<<<<<<< Updated upstream
-      title: 'Flutter Demo', // 제목
-=======
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
->>>>>>> Stashed changes
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
