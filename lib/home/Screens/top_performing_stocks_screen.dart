@@ -12,13 +12,25 @@ class TopPerformingStocksScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('AT-03-01: 주식 AI자동매매 시작/중지'),
+            ElevatedButton(
+              onPressed: null, // 버튼을 비활성화
+              child: Text('주식 AI자동매매 시작/중지 (업데이트 예정...)'),
+            ),
             SizedBox(height: 8.0),
-            Text('AT-03-02: 투자할 자동매매 금액 확인'),
+            ElevatedButton(
+              onPressed: null, // 버튼을 비활성화
+              child: Text('투자할 자동매매 금액 확인 (업데이트 예정...)'),
+            ),
             SizedBox(height: 8.0),
-            Text('AT-03-03: 수익률 표시'),
+            ElevatedButton(
+              onPressed: null, // 버튼을 비활성화
+              child: Text('수익률 표시 (업데이트 예정...)'),
+            ),
             SizedBox(height: 8.0),
-            Text('AT-03-04: AI 매매 내역 표시'),
+            ElevatedButton(
+              onPressed: null, // 버튼을 비활성화
+              child: Text('AI 매매 내역 표시 (업데이트 예정...)'),
+            ),
           ],
         ),
       ),

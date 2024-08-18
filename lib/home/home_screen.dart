@@ -97,6 +97,91 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Home'),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (String result) {
+              switch (result) {
+                case '자산 확인':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AccountsCheckScreen()),
+                  );
+                  break;
+                case '투자 정보':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => InvestmentInfoScreen()),
+                  );
+                  break;
+                case '종목 순위':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => StockRankingScreen()),
+                  );
+                  break;
+                case '주요 지수':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MajorIndicesScreen()),
+                  );
+                  break;
+                case '관심종목/보유종목':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => FavoritesScreen()),
+                  );
+                  break;
+                case 'AI 자동매매':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => TopPerformingStocksScreen()),
+                  );
+                  break;
+                case '챗봇':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChatBotScreen(
+                        csrfToken: widget.csrfToken,
+                        cookieJar: widget.cookieJar,
+                      ),
+                    ),
+                  );
+                  break;
+              }
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              const PopupMenuItem<String>(
+                value: '자산 확인',
+                child: Text('자산 확인 - 총 자산 간편 확인'),
+              ),
+              const PopupMenuItem<String>(
+                value: '투자 정보',
+                child: Text('투자 정보 - 오늘의 투자 정보'),
+              ),
+              const PopupMenuItem<String>(
+                value: '종목 순위',
+                child: Text('종목 순위(국내기준)'),
+              ),
+              const PopupMenuItem<String>(
+                value: '주요 지수',
+                child: Text('주요 지수 - 국내 주요지수'),
+              ),
+              const PopupMenuItem<String>(
+                value: '관심종목/보유종목',
+                child: Text('관심종목/보유종목 - 빠른 종목 탐색'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'AI 자동매매',
+                child: Text('주식 AI 자동매매 시작하기'),
+              ),
+              const PopupMenuItem<String>(
+                value: '챗봇',
+                child: Text('챗봇 - AI와의 대화'),
+              ),
+            ],
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -132,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 barWidth: 2,
                                 belowBarData: BarAreaData(
                                     show: true, colors: [Colors.red.withOpacity(0.3)]),
-                                  dotData: FlDotData(show: false), // 점 제거
+                                dotData: FlDotData(show: false), // 점 제거
                               ),
                             ],
                             axisTitleData: FlAxisTitleData(show: false),
@@ -169,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 barWidth: 2,
                                 belowBarData: BarAreaData(
                                     show: true, colors: [Colors.blue.withOpacity(0.3)]),
-                                    dotData: FlDotData(show: false), // 점 제거
+                                dotData: FlDotData(show: false), // 점 제거
                               ),
                             ],
                             axisTitleData: FlAxisTitleData(show: false),
@@ -275,3 +360,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+

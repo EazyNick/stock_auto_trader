@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
 import 'Button/login_button.dart';
 import 'Button/signup_button.dart';
 import '../utils/logger.dart' as utils_logger;
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import '../home/home_screen.dart';
 
@@ -37,61 +37,63 @@ class _LoginScreenState extends State<LoginScreen> {
     )..interceptors.addAll([LogInterceptor(responseBody: true), CookieManager(cookieJar)]); // 로그 인터셉터와 쿠키 매니저 추가
   }
 
-  /// 폼이 유효한지 검증하고 홈 화면으로 이동하는 메서드
-  void _submit() {
-    // 폼 검증
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-      logger.i('Form is valid, navigating to home screen.');
-      Navigator.pushReplacementNamed(context, '/home', arguments: {'csrfToken': csrfToken, 'cookieJar': cookieJar});
-    } else {
-      logger.w('Form validation failed.');
-    }
-  }
-
   /// 서버에 로그인 요청을 보내는 메서드
   Future<void> _login(BuildContext context) async {
-    logger.i('Attempting to log in with email: ${_emailController.text}');
-    try {
-      final response = await _dio.post(
-        'api/accounts/login/',
-        data: {
-          'Email': _emailController.text,
-          'Password': _passwordController.text,
-        },
-      );
-      // 로그인 성공 시 처리
-      if (response.statusCode == 200) {
-        logger.i('Login successful: ${response.data}');
+    final email = _emailController.text;
+    final password = _passwordController.text;
 
-        // CSRF 토큰 저장
-        final setCookie = response.headers['set-cookie'];
-        if (setCookie != null) {
-          final csrfCookie = setCookie.firstWhere(
-                  (element) => element.contains('csrftoken'),
-              orElse: () => '');
-          csrfToken = RegExp(r'csrftoken=([^;]+)')
-              .firstMatch(csrfCookie)
-              ?.group(1);
-          logger.i('CSRF Token: $csrfToken');
+    // 만약 ID가 'admin'이고 PW가 '1234'라면, 서버 통신 없이 바로 홈 화면으로 이동
+    if (email == 'admin' && password == '1234') {
+      logger.i('Login successful with hardcoded credentials.');
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login successful')));
+
+      // HomeScreen으로 이동하면서 CSRF 토큰과 쿠키 매니저를 전달
+      Navigator.pushReplacementNamed(context, '/home', arguments: {'csrfToken': 'dummy_csrf_token', 'cookieJar': cookieJar});
+    } else {
+      // 그렇지 않다면 서버와 통신하여 로그인 시도
+      logger.i('Attempting to log in with email: $email');
+      try {
+        final response = await _dio.post(
+          'api/accounts/login/',
+          data: {
+            'Email': email,
+            'Password': password,
+          },
+        );
+        // 로그인 성공 시 처리
+        if (response.statusCode == 200) {
+          logger.i('Login successful: ${response.data}');
+
+          // CSRF 토큰 저장
+          final setCookie = response.headers['set-cookie'];
+          if (setCookie != null) {
+            final csrfCookie = setCookie.firstWhere(
+                    (element) => element.contains('csrftoken'),
+                orElse: () => '');
+            csrfToken = RegExp(r'csrftoken=([^;]+)')
+                .firstMatch(csrfCookie)
+                ?.group(1);
+            logger.i('CSRF Token: $csrfToken');
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login successful')));
+
+          // HomeScreen으로 이동하면서 CSRF 토큰과 쿠키 매니저를 전달
+          Navigator.pushReplacementNamed(context, '/home', arguments: {'csrfToken': csrfToken, 'cookieJar': cookieJar});
+        } else {
+          logger.e('Login failed: ${response.data}');
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${response.data}')));
         }
-
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login successful')));
-
-        // HomeScreen으로 이동하면서 CSRF 토큰과 쿠키 매니저를 전달
-        Navigator.pushReplacementNamed(context, '/home', arguments: {'csrfToken': csrfToken, 'cookieJar': cookieJar});
-      } else {
-        logger.e('Login failed: ${response.data}');
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${response.data}')));
-      }
-    } on DioError catch (e) {
-      // 로그인 실패 시 처리
-      if (e.response != null) {
-        logger.e('Login failed: ${e.response?.data}');
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${e.response?.data}')));
-      } else {
-        logger.e('Login failed: ${e.message}');
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${e.message}')));
+      } on DioError catch (e) {
+        // 로그인 실패 시 처리
+        if (e.response != null) {
+          logger.e('Login failed: ${e.response?.data}');
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${e.response?.data}')));
+        } else {
+          logger.e('Login failed: ${e.message}');
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${e.message}')));
+        }
       }
     }
   }
