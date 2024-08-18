@@ -246,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       builder: (context) => TopPerformingStocksScreen()),
                 );
               },
-              child: Text('수익률 상위 종목 Top3'),
+              child: Text('주식 AI 자동매매 시작하기'),
             ),
           ],
         ),
