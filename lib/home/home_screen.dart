@@ -11,6 +11,22 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:fl_chart/fl_chart.dart';
 
+// 코스피/코스닥 그래프 선의 색상을 결정하는 함수
+List<Color> _getLineColor(List<FlSpot> spots) {
+  if (spots.isEmpty) return [Colors.grey];  // 데이터가 없을 경우 회색
+  final lastYValue = spots.last.y;
+  return lastYValue >= 0 ? [Colors.red] : [Colors.blue];  // 양수이면 빨강, 음수이면 파랑
+}
+
+// 코스피/코스닥 그래프 영역 색상을 결정하는 함수
+List<Color> _getFillColor(List<FlSpot> spots) {
+  if (spots.isEmpty) return [Colors.grey.withOpacity(0.3)];  // 데이터가 없을 경우 회색
+  final lastYValue = spots.last.y;
+  return lastYValue >= 0
+      ? [Colors.red.withOpacity(0.3)]
+      : [Colors.blue.withOpacity(0.3)];  // 양수이면 빨강, 음수이면 파랑
+}
+
 class HomeScreen extends StatefulWidget {
   final String csrfToken; // CSRF 토큰을 받기 위해 추가
   final CookieJar cookieJar; // 쿠키 매니저를 받기 위해 추가
@@ -25,16 +41,26 @@ class _HomeScreenState extends State<HomeScreen> {
   List<FlSpot> kospiSpots = [];
   List<FlSpot> kosdaqSpots = [];
   bool isLoading = true;
-  double kospiYesterdayClose = 0.0;
-  double kosdaqYesterdayClose = 0.0;
+  double kospiLatestClose = 0.0;
+  double kosdaqLatestClose = 0.0;
 
   @override
   void initState() {
     super.initState();
-    fetchChartData();
+    fetchChartData();  // 처음 화면 로딩 시 데이터 가져오기
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    fetchChartData();  // 화면으로 다시 돌아올 때마다 데이터 가져오기
   }
 
   Future<void> fetchChartData() async {
+    setState(() {
+      isLoading = true;  // 데이터를 가져오는 동안 로딩 표시
+    });
+
     try {
       Dio dio = Dio();
       final response = await dio.get('https://fintech19190301.kro.kr/api/stock_data/');
@@ -43,12 +69,13 @@ class _HomeScreenState extends State<HomeScreen> {
         final data = response.data;
 
         setState(() {
-          kospiYesterdayClose = _getYesterdayClose(data['kospi_data'], 2000.0); // 코스피 기본값 2000
-          kosdaqYesterdayClose = _getYesterdayClose(data['kosdaq_data'], 800.0); // 코스닥 기본값 800
+          kospiLatestClose = double.parse(data['kospi_latest'][0]['Close']);
+          kosdaqLatestClose = double.parse(data['kosdaq_latest'][0]['Close']);
 
-          kospiSpots = _convertDataToSpots(data['kospi_data'], kospiYesterdayClose);
-          kosdaqSpots = _convertDataToSpots(data['kosdaq_data'], kosdaqYesterdayClose);
-          isLoading = false;
+          kospiSpots = _convertDataToSpots(data['kospi_today'], kospiLatestClose);
+          kosdaqSpots = _convertDataToSpots(data['kosdaq_today'], kosdaqLatestClose);
+
+          isLoading = false;  // 데이터 로딩 완료
         });
       } else {
         throw Exception('Failed to load data');
@@ -56,26 +83,21 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       print('Error: $e');
       setState(() {
-        isLoading = false;
+        isLoading = false;  // 오류 발생 시에도 로딩 해제
       });
     }
   }
 
-  double _getYesterdayClose(List<dynamic> data, double defaultClose) {
-    if (data.isEmpty) return defaultClose;
-    final yesterdayData = data.firstWhere(
-            (item) => DateTime.parse(item['Timestamp']).isBefore(DateTime.now()), orElse: () => null);
-    return yesterdayData != null ? double.parse(yesterdayData['Close']) : defaultClose;
-  }
-
-  List<FlSpot> _convertDataToSpots(List<dynamic> data, double yesterdayClose) {
+  List<FlSpot> _convertDataToSpots(List<dynamic> data, double latestClose) {
     if (data.isEmpty) return [];
 
     List<FlSpot> spots = [];
     for (var i = 0; i < data.length; i++) {
       double x = i.toDouble();
       double closePrice = double.parse(data[i]['Close']);
-      double y = ((closePrice / yesterdayClose) * 100) - 98;
+      double y = ((closePrice / latestClose) * 100) - 100;  // 퍼센트 변화 계산
+      // 변화량을 증폭시키기 위해 y 값에 곱셈 적용 (예: 2배)
+      y *= 2;  // 변화량을 2배로 증폭
       spots.add(FlSpot(x, y));
     }
 
@@ -83,13 +105,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   double _calculateMinY(List<FlSpot> spots) {
-    return 0; // Y축의 최소값을 0으로 고정
+    final minValue = spots.isEmpty ? 0.0 : spots.map((spot) => spot.y).reduce((a, b) => a < b ? a : b);
+    return minValue < -5.0 ? minValue.toDouble() : -5.0;  // 최소값을 -5%로 고정하되, 데이터가 더 작으면 그 값을 사용
   }
 
   double _calculateMaxY(List<FlSpot> spots) {
-    if (spots.isEmpty) return 5; // 데이터가 없을 때 기본 최대값을 5%로 설정
-    final maxValue = spots.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
-    return maxValue < 0 ? 5 : maxValue; // Ensure there's room above 0%
+    final maxValue = spots.isEmpty ? 5.0 : spots.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
+    return maxValue > 5.0 ? maxValue.toDouble() : 5.0;  // 최대값을 5%로 고정하되, 데이터가 더 크면 그 값을 사용
   }
 
   @override
@@ -213,15 +235,29 @@ class _HomeScreenState extends State<HomeScreen> {
                               LineChartBarData(
                                 spots: kospiSpots,
                                 isCurved: true,
-                                colors: [Colors.red],
+                                colors: _getLineColor(kospiSpots),  // 코스피 색상 설정
                                 barWidth: 2,
                                 belowBarData: BarAreaData(
-                                    show: true, colors: [Colors.red.withOpacity(0.3)]),
+                                    show: true,
+                                    colors: _getFillColor(kospiSpots),  // 코스피 영역 색상 설정
+                                ),
                                 dotData: FlDotData(show: false), // 점 제거
                               ),
                             ],
                             axisTitleData: FlAxisTitleData(show: false),
                             lineTouchData: LineTouchData(enabled: false),
+
+                            // 여기서 중앙에 실선을 추가
+                            extraLinesData: ExtraLinesData(
+                              horizontalLines: [
+                                HorizontalLine(
+                                  y: 0.0,  // Y=0에 실선을 추가
+                                  color: Colors.grey,  // 실선 색상 설정
+                                  strokeWidth: 1,  // 실선 두께 설정
+                                  dashArray: [5, 5],  // 실선 스타일 (점선) 설정
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -259,6 +295,18 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                             axisTitleData: FlAxisTitleData(show: false),
                             lineTouchData: LineTouchData(enabled: false),
+
+                            // 여기서 중앙에 실선을 추가
+                            extraLinesData: ExtraLinesData(
+                              horizontalLines: [
+                                HorizontalLine(
+                                  y: 0.0,  // Y=0에 실선을 추가
+                                  color: Colors.grey,  // 실선 색상 설정
+                                  strokeWidth: 1,  // 실선 두께 설정
+                                  dashArray: [5, 5],  // 실선 스타일 (점선) 설정
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -267,7 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 16),  // 그래프와 버튼 사이의 여백
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -360,4 +408,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
