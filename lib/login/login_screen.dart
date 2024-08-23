@@ -23,6 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   late Dio _dio; // late 키워드를 사용하여 나중에 초기화
   String? csrfToken; // CSRF 토큰 저장
   late CookieJar cookieJar;
+  bool _isLoading = false; // 로딩 상태를 추적
 
   @override
   void initState() {
@@ -42,8 +43,16 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailController.text;
     final password = _passwordController.text;
 
+    if (!_formKey.currentState!.validate()) {
+      return; // 폼 유효성 검사에 실패하면 로그인 시도하지 않음
+    }
+
+    setState(() {
+      _isLoading = true; // 로그인 시작 시 로딩 상태로 설정
+    });
+
     // 만약 ID가 'admin'이고 PW가 '1234'라면, 서버 통신 없이 바로 홈 화면으로 이동
-    if (email == 'admin' && password == '1234') {
+    if (email == 'admin@naver.com' && password == '19190301') {
       logger.i('Login successful with hardcoded credentials.');
 
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login successful')));
@@ -94,6 +103,10 @@ class _LoginScreenState extends State<LoginScreen> {
           logger.e('Login failed: ${e.message}');
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: ${e.message}')));
         }
+      } finally {
+        setState(() {
+          _isLoading = false; // 로그인 완료 시 로딩 상태 해제
+        });
       }
     }
   }
@@ -131,7 +144,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 },
                 controller: _passwordController,
               ),
-              LoginButton(
+              SizedBox(height: 16.0),
+              _isLoading
+                  ? CircularProgressIndicator() // 로딩 중일 때 로딩 인디케이터 표시
+                  : LoginButton(
                 emailController: _emailController,
                 passwordController: _passwordController,
                 onPressed: () {

@@ -11,25 +11,9 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:fl_chart/fl_chart.dart';
 
-// 코스피/코스닥 그래프 선의 색상을 결정하는 함수
-List<Color> _getLineColor(List<FlSpot> spots) {
-  if (spots.isEmpty) return [Colors.grey];  // 데이터가 없을 경우 회색
-  final lastYValue = spots.last.y;
-  return lastYValue >= 0 ? [Colors.red] : [Colors.blue];  // 양수이면 빨강, 음수이면 파랑
-}
-
-// 코스피/코스닥 그래프 영역 색상을 결정하는 함수
-List<Color> _getFillColor(List<FlSpot> spots) {
-  if (spots.isEmpty) return [Colors.grey.withOpacity(0.3)];  // 데이터가 없을 경우 회색
-  final lastYValue = spots.last.y;
-  return lastYValue >= 0
-      ? [Colors.red.withOpacity(0.3)]
-      : [Colors.blue.withOpacity(0.3)];  // 양수이면 빨강, 음수이면 파랑
-}
-
 class HomeScreen extends StatefulWidget {
-  final String csrfToken; // CSRF 토큰을 받기 위해 추가
-  final CookieJar cookieJar; // 쿠키 매니저를 받기 위해 추가
+  final String csrfToken;
+  final CookieJar cookieJar;
 
   HomeScreen({required this.csrfToken, required this.cookieJar});
 
@@ -56,9 +40,10 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchChartData();  // 화면으로 다시 돌아올 때마다 데이터 가져오기
   }
 
+
   Future<void> fetchChartData() async {
     setState(() {
-      isLoading = true;  // 데이터를 가져오는 동안 로딩 표시
+      isLoading = true;
     });
 
     try {
@@ -72,10 +57,14 @@ class _HomeScreenState extends State<HomeScreen> {
           kospiLatestClose = double.parse(data['kospi_latest'][0]['Close']);
           kosdaqLatestClose = double.parse(data['kosdaq_latest'][0]['Close']);
 
+          // 테스트 데이터
+          kospiLatestClose = 2707.67;
+          kosdaqLatestClose = 773.47;
+
           kospiSpots = _convertDataToSpots(data['kospi_today'], kospiLatestClose);
           kosdaqSpots = _convertDataToSpots(data['kosdaq_today'], kosdaqLatestClose);
 
-          isLoading = false;  // 데이터 로딩 완료
+          isLoading = false;
         });
       } else {
         throw Exception('Failed to load data');
@@ -83,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       print('Error: $e');
       setState(() {
-        isLoading = false;  // 오류 발생 시에도 로딩 해제
+        isLoading = false;
       });
     }
   }
@@ -95,23 +84,84 @@ class _HomeScreenState extends State<HomeScreen> {
     for (var i = 0; i < data.length; i++) {
       double x = i.toDouble();
       double closePrice = double.parse(data[i]['Close']);
-      double y = ((closePrice / latestClose) * 100) - 100;  // 퍼센트 변화 계산
-      // 변화량을 증폭시키기 위해 y 값에 곱셈 적용 (예: 2배)
-      y *= 2;  // 변화량을 2배로 증폭
+      double y = (((closePrice / latestClose) * 100) - 100) * 3;
       spots.add(FlSpot(x, y));
     }
 
     return spots;
   }
 
+  List<LineChartBarData> _createLineChartBars(List<FlSpot> spots) {
+    List<FlSpot> positiveSpots = [];
+    List<FlSpot> negativeSpots = [];
+
+    List<LineChartBarData> lineBars = []; // 라인 데이터들을 저장할 리스트
+
+    for (int i = 0; i < spots.length; i++) {
+      FlSpot currentSpot = spots[i];
+      FlSpot? previousSpot = i > 0 ? spots[i - 1] : null;
+
+      if (previousSpot != null && ((previousSpot.y >= 0 && currentSpot.y < 0) || (previousSpot.y < 0 && currentSpot.y >= 0))) {
+        // 양수와 음수의 전환 지점에서 0에 대한 정확한 교차점 찾기
+        double slope = (currentSpot.y - previousSpot.y) / (currentSpot.x - previousSpot.x);
+        double zeroCrossX = previousSpot.x + (0 - previousSpot.y) / slope;
+        FlSpot zeroSpot = FlSpot(zeroCrossX, 0);
+
+        if (previousSpot.y >= 0) {
+          positiveSpots.add(zeroSpot);
+          lineBars.add(_createBarData(positiveSpots, Colors.red)); // 양수 구간을 추가
+          positiveSpots = [];
+          negativeSpots.add(zeroSpot);
+        } else {
+          negativeSpots.add(zeroSpot);
+          lineBars.add(_createBarData(negativeSpots, Colors.blue)); // 음수 구간을 추가
+          negativeSpots = [];
+          positiveSpots.add(zeroSpot);
+        }
+      }
+
+      if (currentSpot.y >= 0) {
+        positiveSpots.add(currentSpot);
+      } else {
+        negativeSpots.add(currentSpot);
+      }
+    }
+
+    // 남은 양수/음수 구간을 추가
+    if (positiveSpots.isNotEmpty) {
+      lineBars.add(_createBarData(positiveSpots, Colors.red));
+    }
+    if (negativeSpots.isNotEmpty) {
+      lineBars.add(_createBarData(negativeSpots, Colors.blue));
+    }
+
+    return lineBars;
+  }
+
+  LineChartBarData _createBarData(List<FlSpot> spots, Color color) {
+    return LineChartBarData(
+      spots: spots,
+      isCurved: true,
+      colors: [color],
+      barWidth: 2,
+      belowBarData: BarAreaData(
+        show: true,
+        colors: [color.withOpacity(0.3)],
+        cutOffY: 0,
+        applyCutOffY: true,
+      ),
+      dotData: FlDotData(show: false),
+    );
+  }
+
   double _calculateMinY(List<FlSpot> spots) {
     final minValue = spots.isEmpty ? 0.0 : spots.map((spot) => spot.y).reduce((a, b) => a < b ? a : b);
-    return minValue < -5.0 ? minValue.toDouble() : -5.0;  // 최소값을 -5%로 고정하되, 데이터가 더 작으면 그 값을 사용
+    return minValue < -5.0 ? minValue.toDouble() : -5.0;
   }
 
   double _calculateMaxY(List<FlSpot> spots) {
     final maxValue = spots.isEmpty ? 5.0 : spots.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
-    return maxValue > 5.0 ? maxValue.toDouble() : 5.0;  // 최대값을 5%로 고정하되, 데이터가 더 크면 그 값을 사용
+    return maxValue > 5.0 ? maxValue.toDouble() : 5.0;
   }
 
   @override
@@ -231,23 +281,31 @@ class _HomeScreenState extends State<HomeScreen> {
                             titlesData: FlTitlesData(show: false),
                             minY: _calculateMinY(kospiSpots),
                             maxY: _calculateMaxY(kospiSpots),
-                            lineBarsData: [
-                              LineChartBarData(
-                                spots: kospiSpots,
-                                isCurved: true,
-                                colors: _getLineColor(kospiSpots),  // 코스피 색상 설정
-                                barWidth: 2,
-                                belowBarData: BarAreaData(
-                                    show: true,
-                                    colors: _getFillColor(kospiSpots),  // 코스피 영역 색상 설정
-                                ),
-                                dotData: FlDotData(show: false), // 점 제거
-                              ),
-                            ],
+                            lineBarsData: _createLineChartBars(kospiSpots),
                             axisTitleData: FlAxisTitleData(show: false),
-                            lineTouchData: LineTouchData(enabled: false),
+                            lineTouchData: LineTouchData(
+                              enabled: false,
+                              touchTooltipData: LineTouchTooltipData(
+                                tooltipBgColor: Colors.transparent,
+                                getTooltipItems: (List<LineBarSpot> touchedSpots) {
+                                  return touchedSpots.map((LineBarSpot touchedSpot) {
+                                    if (touchedSpot.y >= 0) {
+                                      return LineTooltipItem(
+                                        touchedSpot.y.toString(),
+                                        const TextStyle(color: Colors.red),
+                                      );
+                                    } else {
+                                      return LineTooltipItem(
+                                        touchedSpot.y.toString(),
+                                        const TextStyle(color: Colors.blue),
+                                      );
+                                    }
+                                  }).toList();
+                                },
+                              ),
+                            ),
 
-                            // 여기서 중앙에 실선을 추가
+                            // 중앙에 실선을 추가
                             extraLinesData: ExtraLinesData(
                               horizontalLines: [
                                 HorizontalLine(
@@ -282,21 +340,31 @@ class _HomeScreenState extends State<HomeScreen> {
                             titlesData: FlTitlesData(show: false),
                             minY: _calculateMinY(kosdaqSpots),
                             maxY: _calculateMaxY(kosdaqSpots),
-                            lineBarsData: [
-                              LineChartBarData(
-                                spots: kosdaqSpots,
-                                isCurved: true,
-                                colors: [Colors.blue],
-                                barWidth: 2,
-                                belowBarData: BarAreaData(
-                                    show: true, colors: [Colors.blue.withOpacity(0.3)]),
-                                dotData: FlDotData(show: false), // 점 제거
-                              ),
-                            ],
+                            lineBarsData: _createLineChartBars(kosdaqSpots),
                             axisTitleData: FlAxisTitleData(show: false),
-                            lineTouchData: LineTouchData(enabled: false),
+                            lineTouchData: LineTouchData(
+                              enabled: false,
+                              touchTooltipData: LineTouchTooltipData(
+                                tooltipBgColor: Colors.transparent,
+                                getTooltipItems: (List<LineBarSpot> touchedSpots) {
+                                  return touchedSpots.map((LineBarSpot touchedSpot) {
+                                    if (touchedSpot.y >= 0) {
+                                      return LineTooltipItem(
+                                        touchedSpot.y.toString(),
+                                        const TextStyle(color: Colors.red),
+                                      );
+                                    } else {
+                                      return LineTooltipItem(
+                                        touchedSpot.y.toString(),
+                                        const TextStyle(color: Colors.blue),
+                                      );
+                                    }
+                                  }).toList();
+                                },
+                              ),
+                            ),
 
-                            // 여기서 중앙에 실선을 추가
+                            // 중앙에 실선을 추가
                             extraLinesData: ExtraLinesData(
                               horizontalLines: [
                                 HorizontalLine(
