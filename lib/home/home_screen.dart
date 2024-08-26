@@ -40,6 +40,11 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchChartData();  // 화면으로 다시 돌아올 때마다 데이터 가져오기
   }
 
+  @override
+  void didUpdateWidget(HomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    fetchChartData();  // 위젯이 업데이트될 때마다 데이터 가져오기
+  }
 
   Future<void> fetchChartData() async {
     setState(() {
@@ -145,6 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
           negativeSpots.add(zeroSpot);
         } else {
           negativeSpots.add(zeroSpot);
+          print('Negative Spots: $negativeSpots');
           lineBars.add(_createBarData(negativeSpots, Colors.blue)); // 음수 구간을 추가
           negativeSpots = [];
           positiveSpots.add(zeroSpot);
