@@ -57,12 +57,32 @@ class _HomeScreenState extends State<HomeScreen> {
           kospiLatestClose = double.parse(data['kospi_latest'][0]['Close']);
           kosdaqLatestClose = double.parse(data['kosdaq_latest'][0]['Close']);
 
-          // 테스트 데이터
-          kospiLatestClose = 2707.67;
-          kosdaqLatestClose = 773.47;
+          print('kospiLatestClose: $kospiLatestClose');
+          print('kosdaqLatestClose: $kosdaqLatestClose');
+
+          // // 테스트 데이터
+          // kospiLatestClose = 2707.67;
+          // kosdaqLatestClose = 773.47;
 
           kospiSpots = _convertDataToSpots(data['kospi_today'], kospiLatestClose);
           kosdaqSpots = _convertDataToSpots(data['kosdaq_today'], kosdaqLatestClose);
+
+          print('kospiSpots1: $kospiSpots');
+          print('kosdaqSpots1: $kosdaqSpots');
+
+          if (data['kospi_today'].isNotEmpty) {
+            kospiSpots = _convertDataToSpots(data['kospi_today'], kospiLatestClose);
+          } else {
+            kospiSpots = _convertDataToSpots([kospiLatestClose], kospiLatestClose);
+            print('kospiSpots2: $kospiSpots');
+          }
+
+          if (data['kosdaq_today'].isNotEmpty) {
+            kosdaqSpots = _convertDataToSpots(data['kosdaq_today'], kosdaqLatestClose);
+          } else {
+            kosdaqSpots = _convertDataToSpots([kosdaqLatestClose], kosdaqLatestClose);
+            print('kosdaqSpots2: $kosdaqSpots');
+          }
 
           isLoading = false;
         });
@@ -83,7 +103,18 @@ class _HomeScreenState extends State<HomeScreen> {
     List<FlSpot> spots = [];
     for (var i = 0; i < data.length; i++) {
       double x = i.toDouble();
-      double closePrice = double.parse(data[i]['Close']);
+      double closePrice;
+
+      if (data[i] is Map<String, dynamic>) {
+        // 일반적인 경우: data[i]가 Map 타입일 때
+        closePrice = double.parse(data[i]['Close']);
+      } else if (data[i] is double) {
+        // 대체 데이터로 사용할 경우: data[i]가 double 타입일 때
+        closePrice = data[i];
+      } else {
+        continue;  // 예상치 못한 데이터 타입일 경우 건너뜀
+      }
+
       double y = (((closePrice / latestClose) * 100) - 100) * 3;
       spots.add(FlSpot(x, y));
     }
