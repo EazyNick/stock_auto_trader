@@ -27,7 +27,7 @@ class IndexChart extends StatelessWidget {
             children: <Widget>[
               Text(
                 "Index Prices",
-                style: Theme.of(context).textTheme.bodyText1,
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
               Expanded(
                 child: charts.TimeSeriesChart(series, animate: true),
