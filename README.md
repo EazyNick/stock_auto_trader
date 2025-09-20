@@ -1,5 +1,2 @@
-# stock_auto_trader
- 주식 자동매매 사용자를 위한 애플리케이션
-
-# 2024/05/26
-- 회원가입, 로그인 화면 기능 구현
+# 2024 한이음 ICT 프로젝트, 주식 자동매매 시스템 확인 애플리케이션
+https://www.youtube.com/watch?v=ztcIzkfpueM
