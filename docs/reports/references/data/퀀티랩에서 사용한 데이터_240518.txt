@@ -1,0 +1,49 @@
+📊 기본 시세 정보
+open: 시가 (해당 거래일 첫 거래 가격)
+high: 고가 (거래일 중 가장 높은 가격)
+low: 저가 (거래일 중 가장 낮은 가격)
+close: 종가 (거래일 마지막 가격)
+volume: 거래량
+
+📈 가격/거래량 비율 및 파생지표
+diffratio: 등락률 ((종가-전일종가)/전일종가)
+high_close_ratio: 고가 대비 종가 비율 (종가/고가)
+low_close_ratio: 저가 대비 종가 비율 (종가/저가)
+open_lastclose_ratio: 전일 종가 대비 시가 비율 (시가/전일종가)
+volume_lastvolume_ratio: 전일 거래량 대비 거래량 비율
+trans_price_exp: 거래대금 지수화(로그 변환 등)
+trans_price_exp_ma5: 거래대금 지수의 5일 이동평균
+close_ma5_ratio, close_ma10_ratio … close_ma120_ratio: 종가 대비 N일 이동평균선 비율
+volume_ma5_ratio … volume_ma120_ratio: 거래량 대비 N일 이동평균선 비율
+
+📊 기술적 지표
+close_ubb_ratio: 종가가 볼린저밴드 상단선(Upper Band) 대비 비율
+close_lbb_ratio: 종가가 볼린저밴드 하단선(Lower Band) 대비 비율
+rsi: 상대강도지수 (Relative Strength Index)
+buy_strength_ma5_ratio / sell_strength_ma5_ratio: 매수/매도 강도 5일 이동평균 대비 비율
+adx: 추세 강도 지표 (Average Directional Index)
+lbb / ubb: 볼린저밴드 하단/상단
+ma20: 20일 이동평균선
+macd / macd_signal: 이동평균 수렴·발산 지표 및 시그널선
+minus_dmi / plus_dmi: DMI 지표의 -DI, +DI
+rsi_signal: RSI 시그널선
+macd_signal_ratio: MACD 대비 시그널 비율
+
+📑 재무 지표
+eps, bps: 주당순이익(Earnings Per Share), 주당순자산(Book Value Per Share)
+per, pbr: 주가수익비율(Price/Earnings), 주가순자산비율(Price/Book)
+roe, roa: 자기자본이익률(Return on Equity), 총자산이익률(Return on Assets)
+eps_krx, bps_krx, per_krx, pbr_krx, roe_krx: 한국거래소(KRX)에서 제공하는 동일 항목 값
+dps_krx, dyr_krx: 주당 배당금, 배당수익률
+marketcap: 시가총액
+
+📉 업종 및 수급 지표
+ind, ind_diff, ind_maN: 업종 지수 및 차이, 이동평균
+inst, inst_diff, inst_maN: 기관 투자자 순매매량 및 이동평균
+foreign, foreign_diff, foreign_maN: 외국인 투자자 순매매량 및 이동평균
+bal_rto, bal_rto_diff, bal_rto_maN: 대차잔고 비율 및 이동평균
+short_ratio, short_ratio_diff, short_ratio_maN: 공매도 비율 및 이동평균
+
+📐 추가 파생 값
+prevvalid_cnt: 유효 거래일 카운트 (결측치 보정용)
+trans_price_mean: 평균 거래대금
