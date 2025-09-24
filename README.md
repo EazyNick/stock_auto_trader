@@ -14,6 +14,17 @@ Flutter를 활용한 주식 투자 정보 제공 및 AI 자동매매 시스템�
 | **팀원** | [최민경] | UI/UX 디자인, 모바일 앱 개발 (Flutter) | [서울여자대학교 경제학과과]              |
 | **멘토** | [이규영] | 프로젝트 멘토링                        | [한국과학기술원 정보보호대학원]          |
 
+### 🖥 백엔드 시스템 레포지토리
+
+- **GitHub 저장소**: [2024_RLTrading_A3C](https://github.com/EazyNick/2024_RLTrading_A3C)
+- **기술 스택**: Django, Nginx, AWS EC2 (Amazon Linux 2)
+
+### 🤖 AI 모델 학습 레포지토리
+
+- **모델 학습 저장소**: [ICTRLT](https://github.com/EazyNick/ICTRLT)
+- **기술 스택**: A3C 강화학습, PyTorch, Python
+- **설명**: A3C(Asynchronous Advantage Actor-Critic) 강화학습 알고리즘을 활용한 주식 자동매매 모델 학습
+
 ## 🎯 프로젝트 개요
 
 본 프로젝트는 개인 투자자들을 위한 종합 주식 투자 플랫폼으로, 실시간 주식 데이터 분석과 AI 기반 자동매매 시스템을 모바일 환경에서 제공합니다. 2024년 한이음 ICT 프로젝트의 일환으로 개발되었으며, 총장배소프트웨어대회에서 은상을 수상한 작품입니다.

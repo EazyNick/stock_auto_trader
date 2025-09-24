@@ -2,6 +2,13 @@
 
 이 디렉토리는 주식 자동매매 모바일 앱 프로젝트의 모든 문서와 자료를 포함합니다.
 
+## 🖥 백엔드 시스템
+
+### 자동매매 백엔드 페이지
+
+- **GitHub 저장소**: [2024_RLTrading_A3C](https://github.com/EazyNick/2024_RLTrading_A3C)
+- **기술 스택**: Django, Nginx, AWS EC2 (Amazon Linux 2)
+
 ## 📁 디렉토리 구조
 
 ```
